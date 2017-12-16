@@ -65,6 +65,11 @@ class ClientAuthentication(config: SonarBBPluginConfig) {
         oauthAccessToken = createOauthAccessToken(client)
       }
       auth.bind(client, config)
+    } else if (isAccessTokenOauth) {
+      val auth = new AuthenticationBinder with UserOauthAuthentication {
+        oauthAccessToken = config.apiKey()
+      }
+      auth.bind(client, config)
     } else if (isTeamApiKey) {
       val auth = new AuthenticationBinder with TeamApiKeyAuthentication
       auth.bind(client, config)
@@ -75,9 +80,11 @@ class ClientAuthentication(config: SonarBBPluginConfig) {
     }
   }
 
-  private def isTeamApiKey = Option(config.teamName()).nonEmpty
+  private def isTeamApiKey = Option(config.teamName()).nonEmpty && Option(config.apiKey()).nonEmpty
 
   private def isUserOauth = Option(config.oauthTokenClientKey()).nonEmpty
+
+  private def isAccessTokenOauth = Option(config.apiKey()).nonEmpty && !Option(config.teamName()).nonEmpty
 
   private def createOauthAccessToken(client: Client) = {
     val oauthFilter = new HTTPBasicAuthFilter(config.oauthTokenClientKey(), config.oauthTokenClientSecret())
