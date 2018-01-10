@@ -31,18 +31,18 @@ sealed trait BuildStatus {
   def name: String
   def description: String
 }
-case class FailingBuildStatus(severity: Severity, numIssues: Int) extends BuildStatus {
+case class FailingBuildStatus(buildName: String, severity: Severity, numIssues: Int) extends BuildStatus {
   val name = "FAILED"
-  val description = s"Sonar analysis failed. Found $numIssues issues with severity >= $severity"
+  val description = s"$buildName failed. Found $numIssues issues with severity >= $severity"
 }
 
-case object InProgressBuildStatus extends BuildStatus {
+case class InProgressBuildStatus(buildName: String) extends BuildStatus {
   val name = "INPROGRESS"
-  val description = "Sonar analysis in progress..."
+  val description = "$buildName in progress..."
 }
-case object SuccessfulBuildstatus extends BuildStatus {
+case class SuccessfulBuildstatus(buildName: String) extends BuildStatus {
   val name = "SUCCESSFUL"
-  val description = s"Sonar analysis successful :-)"
+  val description = s"$buildName successful :-)"
 }
 
 @BatchSide
@@ -208,7 +208,7 @@ class BitbucketClient(config: SonarBBPluginConfig) {
     response.getStatus == 200
   }
 
-  def updateBuildStatus(pullRequest: PullRequest, buildStatus: BuildStatus, sonarServerUrl: String): Unit = {
+  def updateBuildStatus(pullRequest: PullRequest, buildStatus: BuildStatus, buildName: String, sonarServerUrl: String): Unit = {
     try {
       // This uses the source url from the bitbucket response.
       // Typically pullrequests' source is not the same repo as where the PR was created.
@@ -222,7 +222,7 @@ class BitbucketClient(config: SonarBBPluginConfig) {
         .accept(MediaType.APPLICATION_JSON)
         .entity(JsonUtils.map2Json(Map("state" -> buildStatus.name,
                                        "description" -> buildStatus.description,
-                                       "name" -> "Sonar analysis",
+                                       "name" -> buildName,
                                        "key" -> s"SONAR-ANALYSIS-PR-${pullRequest.id}",
                                        "url" -> sonarServerUrl)))
         .post()

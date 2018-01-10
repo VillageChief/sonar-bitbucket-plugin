@@ -30,6 +30,8 @@ class SonarBBPluginConfig(settings: Settings, server: Server) {
 
   def buildStatusEnabled(): Boolean = settings.getBoolean(SonarBBPlugin.BitbucketBuildStatus)
 
+  def buildName(): String = settings.getString(SonarBBPlugin.BitbucketBuildName)
+
   def sonarApprovalSeverityLevel(): String = settings.getString(SonarBBPlugin.SonarUnapprovalSeverityLevel)
 
   def branchName(): String = {

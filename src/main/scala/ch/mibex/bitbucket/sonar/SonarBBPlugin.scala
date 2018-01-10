@@ -23,6 +23,7 @@ object SonarBBPlugin {
   final val BitbucketOAuthClientSecret = "sonar.bitbucket.oauthClientSecret"
   final val BitbucketApproveUnapprove = "sonar.bitbucket.approvalFeatureEnabled"
   final val BitbucketBuildStatus = "sonar.bitbucket.buildStatusEnabled"
+  final val BitbucketBuildName = "sonar.bitbucket.buildName"
   final val SonarUnapprovalSeverityLevel = "sonar.bitbucket.maxSeverityApprovalLevel"
 }
 
@@ -124,6 +125,13 @@ object SonarBBPlugin {
       defaultValue = "true",
       description = "If enabled, the plug-in will update the build status of the pull request depending on the " +
         "Sonar analysis result. The analysis and also the build is failed if there are any critical or blocker issues.",
+      global = true
+    ),
+    new Property(
+      key = SonarBBPlugin.BitbucketBuildName,
+      name = "Bitbucket build name",
+      defaultValue = "Sonar Analysis",
+      description = "The name of the analysis result.",
       global = true
     )
   )

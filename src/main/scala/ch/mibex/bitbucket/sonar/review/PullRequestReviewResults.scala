@@ -19,9 +19,9 @@ class PullRequestReviewResults(pluginConfiguration: SonarBBPluginConfig) {
   def calculateBuildStatus(): BuildStatus = {
     val issuesWithAboveMaxSeverity = countIssuesWithAboveMaxSeverity
     if (issuesWithAboveMaxSeverity == 0)
-      SuccessfulBuildstatus
+      SuccessfulBuildstatus(pluginConfiguration.buildName)
     else
-      FailingBuildStatus(Severity.valueOf(pluginConfiguration.sonarApprovalSeverityLevel()), issuesWithAboveMaxSeverity)
+      FailingBuildStatus(pluginConfiguration.buildName, Severity.valueOf(pluginConfiguration.sonarApprovalSeverityLevel()), issuesWithAboveMaxSeverity)
   }
 
   def formatAsMarkdown(): String = {

@@ -32,14 +32,13 @@ class SonarReviewPostJob(
 
   private def getProjectUrl(context: PostJobContext, pullRequest: PullRequest) =
     (getSonarBaseUrl(context.settings()) + "/dashboard?id="
-      + context.settings().getString(CoreProperties.PROJECT_KEY_PROPERTY) + ":"
-      + URLEncoder.encode(pullRequest.srcBranch, "UTF-8"))
+      + context.settings().getString(CoreProperties.PROJECT_KEY_PROPERTY))
 
   private def getSonarBaseUrl(settings: Settings) =
     Option(settings.getString(CoreProperties.SERVER_BASE_URL)).getOrElse(settings.getString("sonar.host.url"))
 
   private def handlePullRequest(context: PostJobContext, pullRequest: PullRequest) {
-    setBuildStatus(InProgressBuildStatus, context, pullRequest)
+    setBuildStatus(InProgressBuildStatus(pluginConfig.buildName()), context, pullRequest)
     val ourComments = bitbucketClient.findOwnPullRequestComments(pullRequest)
     val report = new PullRequestReviewResults(pluginConfig)
     reviewCommentsHandler.updateComments(pullRequest, context.issues().asScala, ourComments, report)
@@ -51,7 +50,7 @@ class SonarReviewPostJob(
 
   private def setBuildStatus(buildStatus: BuildStatus, context: PostJobContext, pullRequest: PullRequest) {
     if (pluginConfig.buildStatusEnabled()) {
-      bitbucketClient.updateBuildStatus(pullRequest, buildStatus, getProjectUrl(context, pullRequest))
+      bitbucketClient.updateBuildStatus(pullRequest, buildStatus, pluginConfig.buildName(), getProjectUrl(context, pullRequest))
     }
   }
 
